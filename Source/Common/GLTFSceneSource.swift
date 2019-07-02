@@ -11,49 +11,14 @@ import SceneKit
 @objcMembers
 @available(iOS 10.0, *)
 public class GLTFSceneSource : SCNSceneSource {
-    private var loader: GLTFUnarchiver! = nil
+    private let loader: GLTFUnarchiver
     
-    public override init() {
-        super.init()
-    }
-    
-    public convenience init(path: String, options: [SCNSceneSource.LoadingOption : Any]? = nil, extensions: [String:Codable.Type]? = nil) throws {
-        self.init()
-        
-        let loader = try GLTFUnarchiver(path: path, extensions: extensions)
+    public init?(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?) {
+        guard let loader = try? GLTFUnarchiver(url: url, extensions: extensions) else {
+            return nil
+        }
         self.loader = loader
-    }
-    
-    public override convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]? = nil) {
-        self.init()
-        do {
-            let loader = try GLTFUnarchiver(url: url, extensions: nil)
-            self.loader = loader
-        } catch {
-            print("\(error.localizedDescription)")
-        }
-    }
-    
-    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?) throws {
-        self.init()
-        self.loader = try GLTFUnarchiver(url: url, extensions: extensions)
-    }
-    
-    public override convenience init(data: Data, options: [SCNSceneSource.LoadingOption : Any]? = nil) {
-        self.init()
-        do {
-            self.loader = try GLTFUnarchiver(data: data)
-        } catch {
-            print("\(error.localizedDescription)")
-        }
-    }
-    
-    public convenience init(named name: String, options: [SCNSceneSource.LoadingOption : Any]? = nil, extensions: [String:Codable.Type]? = nil) throws {
-        let filePath = Bundle.main.path(forResource: name, ofType: nil)
-        guard let path = filePath else {
-            throw URLError(.fileDoesNotExist)
-        }
-        try self.init(path: path, options: options, extensions: extensions)
+        super.init(url: url, options: options)
     }
     
     public override func scene(options: [SCNSceneSource.LoadingOption : Any]? = nil) throws -> SCNScene {
